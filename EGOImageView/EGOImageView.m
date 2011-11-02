@@ -28,7 +28,8 @@
 #import "EGOImageLoader.h"
 
 @implementation EGOImageView
-@synthesize imageURL, placeholderImage, delegate;
+@synthesize imageURL, backgroundImage, placeholderImage, delegate, edgeInsets;
+@synthesize originalImage;
 
 - (id)initWithPlaceholderImage:(UIImage*)anImage {
 	return [self initWithPlaceholderImage:anImage delegate:nil];	
@@ -64,13 +65,14 @@
 	if(anImage) {
 		self.image = anImage;
 
-		// trigger the delegate callback if the image was found in the cache
+        // trigger the delegate callback if the image was found in the cache
 		if([self.delegate respondsToSelector:@selector(imageViewLoadedImage:)]) {
 			[self.delegate imageViewLoadedImage:self];
 		}
 	} else {
 		self.image = self.placeholderImage;
 	}
+    [self setNeedsDisplay];
 }
 
 #pragma mark -
@@ -101,9 +103,32 @@
 	}
 }
 
+- (void)setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+    [self setImage:self.originalImage];
+}
+
+#pragma mark - Drawing
+- (void)setImage:(UIImage *)image {
+    self.originalImage = image;
+    UIGraphicsBeginImageContext(self.frame.size);
+    [self.backgroundImage drawInRect:self.bounds];
+    CGRect imageFrame = CGRectMake(self.edgeInsets.left, self.edgeInsets.top, 
+                                   self.frame.size.width - self.edgeInsets.left - self.edgeInsets.right,
+                                   self.frame.size.height - self.edgeInsets.top - self.edgeInsets.bottom
+                                   );
+    [image drawInRect:imageFrame];
+    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    [super setImage:img];
+}
+
 #pragma mark -
 - (void)dealloc {
 	[[EGOImageLoader sharedImageLoader] removeObserver:self];
+    self.originalImage = nil;
+    self.backgroundImage = nil;
 	self.imageURL = nil;
 	self.placeholderImage = nil;
     [super dealloc];

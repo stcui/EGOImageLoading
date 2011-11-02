@@ -31,8 +31,11 @@
 @interface EGOImageView : UIImageView<EGOImageLoaderObserver> {
 @private
 	NSURL* imageURL;
+    UIImage* backgroundImage;
 	UIImage* placeholderImage;
+    UIImage* originalImage;
 	id<EGOImageViewDelegate> delegate;
+    UIEdgeInsets edgeInsets;
 }
 
 - (id)initWithPlaceholderImage:(UIImage*)anImage; // delegate:nil
@@ -41,8 +44,11 @@
 - (void)cancelImageLoad;
 
 @property(nonatomic,retain) NSURL* imageURL;
+@property(nonatomic,retain) UIImage* backgroundImage;
 @property(nonatomic,retain) UIImage* placeholderImage;
-@property(nonatomic,assign) id<EGOImageViewDelegate> delegate;
+@property(nonatomic,retain) UIImage *originalImage;
+@property(nonatomic,assign) UIEdgeInsets edgeInsets;
+@property(nonatomic,retain) id<EGOImageViewDelegate> delegate;
 @end
 
 @protocol EGOImageViewDelegate<NSObject>
